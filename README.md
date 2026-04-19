@@ -2,11 +2,18 @@
 
 This repository contains a diffusion model trained to generate synthetic galaxy images.
 
+## Convergence of the Network
+
+One can clearly see how the quality of the generated Galaxies improves with the training epochs. 
+Initially, the Network seems do produce pure noise. As the training progresses, the generated images increasingly resemble galaxies.
+
+![Training](Results/Fig1_Training.png)
+
 ## Sampling Evolution
 
 The following image demonstrates the reverse diffusion process, showing the transition from pure noise to structured galaxy formations over various sampling steps.
 
-![Diffusion Evolution](Diffusion.png)
+![Diffusion Evolution](Results/Fig2_Diffusion.png)
 
 ## Implementation
 
