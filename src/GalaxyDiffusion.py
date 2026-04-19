@@ -162,6 +162,33 @@ class Diffusion:
                 x = 1 / torch.sqrt(alpha) * (x - ((1 - alpha) / (torch.sqrt(1 - alpha_hat))) * predicted_noise) + torch.sqrt(beta) * noise
         return x
 
+
+class VisualDiffusion(Diffusion):
+    def sample_evolution(self, model, n=1, steps_to_save=[999, 750, 500, 250, 0]):
+        model.eval()
+        results = {}
+        device = next(model.parameters()).device
+        
+        with torch.no_grad():
+            x = torch.randn((n, 3, 64, 64)).to(device)
+            for i in tqdm(reversed(range(0, self.steps)), total=self.steps):
+                t = (torch.ones(n) * i).long().to(device)
+                predicted_noise = model(x, t)
+                
+                alpha = self.alpha[t][:, None, None, None]
+                alpha_hat = self.alpha_hat[t][:, None, None, None]
+                beta = self.beta[t][:, None, None, None]
+                
+                noise = torch.randn_like(x) if i > 0 else torch.zeros_like(x)
+                x = 1 / torch.sqrt(alpha) * (x - ((1 - alpha) / (torch.sqrt(1 - alpha_hat))) * predicted_noise) + torch.sqrt(beta) * noise
+                
+                if i in steps_to_save:
+                    img = (x.clone().clamp(-1, 1) + 1) / 2
+                    results[i] = img.cpu()
+        
+        return [results[s] for s in steps_to_save]
+
+
 class Galaxy10Dataset(Dataset):
     def __init__(self, file_path):
         with h5py.File(file_path, 'r') as f:
